@@ -6,7 +6,7 @@ export async function onRequestGet(context) {
     if (!bucket) return notFound();
 
     const objList = await bucket.list({
-      prefix: path,
+      prefix: path && `${path}/`,
       delimiter: "/",
       include: ["httpMetadata", "customMetadata"],
     });
