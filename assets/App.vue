@@ -275,7 +275,7 @@ export default {
       }
 
       /** @type File **/
-      const file = this.uploadQueue.pop(0);
+      const { basedir, file } = this.uploadQueue.pop(0);
       let thumbnailDigest = null;
 
       if (file.type.startsWith("image/") || file.type === "video/mp4") {
@@ -301,7 +301,7 @@ export default {
       }
 
       try {
-        const uploadUrl = `/api/write/items/${this.cwd}${file.name}`;
+        const uploadUrl = `/api/write/items/${basedir}${file.name}`;
         const headers = {};
         const onUploadProgress = (progressEvent) => {
           var percentCompleted =
@@ -310,7 +310,7 @@ export default {
         };
         if (thumbnailDigest) headers["fd-thumbnail"] = thumbnailDigest;
         if (file.size >= SIZE_LIMIT) {
-          await multipartUpload(`${this.cwd}${file.name}`, file, {
+          await multipartUpload(`${basedir}${file.name}`, file, {
             headers,
             onUploadProgress,
           });
@@ -347,7 +347,11 @@ export default {
     uploadFiles(files) {
       if (this.cwd && !this.cwd.endsWith("/")) this.cwd += "/";
 
-      this.uploadQueue.push(...files);
+      const uploadTasks = Array.from(files).map((file) => ({
+        basedir: this.cwd,
+        file,
+      }));
+      this.uploadQueue.push(...uploadTasks);
       setTimeout(() => this.processUploadQueue());
     },
   },
