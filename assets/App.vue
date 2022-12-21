@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main" @dragenter.prevent @dragover.prevent @drop.prevent="onDrop">
     <progress
       v-if="uploadProgress !== null"
       :value="uploadProgress"
@@ -32,12 +32,7 @@
     >
       <input type="search" v-model="search" aria-label="Search" />
     </div>
-    <ul
-      class="file-list"
-      @dragenter.prevent
-      @dragover.prevent
-      @drop.prevent="onDrop"
-    >
+    <ul class="file-list">
       <li v-if="cwd !== ''">
         <div
           tabindex="0"
@@ -389,3 +384,9 @@ export default {
   },
 };
 </script>
+
+<style>
+.main {
+  height: 100%;
+}
+</style>

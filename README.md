@@ -4,6 +4,7 @@ CloudFlare R2 storage manager with Pages and Workers. Free 10 GB storage. Free s
 
 ## Features
 
+- Drag-and-drop upload
 - Upload large files
 - Create folders
 - Search files
