@@ -22,9 +22,9 @@ Before starting, you should make sure that
 Steps:
 
 1. Fork this project and connect your fork with CloudFlare Pages
-2. Add a custom domain (e.g. `mydrive.domain.com`)
-3. Bind R2 buckets. Set variable name as subdomain prefix (e.g. `mydrive`)
-4. Manually redeploy to make R2 bindings take effect.
+2. Add a custom domain
+3. Bind your R2 bucket to `BUCKET` varaible
+4. Manually redeploy to make R2 bindings take effect
 
 ### Authentication
 
