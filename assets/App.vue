@@ -1,0 +1,458 @@
+<template>
+  <div class="main">
+    <progress
+      v-if="uploadProgress !== null"
+      :value="uploadProgress"
+      max="100"
+    ></progress>
+    <label class="create-folder-button" tabindex="0">
+      <img
+        style="filter: invert(100%)"
+        src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/create_new_folder/materialicons/36dp/2x/baseline_create_new_folder_black_36dp.png"
+        alt="Create folder"
+        width="36"
+        height="36"
+        @contextmenu.prevent
+      />
+      <button hidden @click="createFolder"></button>
+    </label>
+    <label class="upload-button" tabindex="0">
+      <img
+        style="filter: invert(100%)"
+        src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/upload_file/materialicons/36dp/2x/baseline_upload_file_black_36dp.png"
+        alt="Upload"
+        width="36"
+        height="36"
+        @contextmenu.prevent
+      />
+      <input type="file" id="file" multiple hidden @change="onUploadClicked" />
+    </label>
+    <div
+      style="position: sticky; top: 0; padding: 8px; background-color: white"
+    >
+      <input type="search" v-model="search" aria-label="Search" />
+    </div>
+    <ul
+      class="file-list"
+      @dragenter.prevent
+      @dragover.prevent
+      @drop.prevent="onDrop"
+    >
+      <li v-if="cwd !== ''">
+        <div
+          tabindex="0"
+          class="file-item"
+          @click="cwd = cwd.replace(/[^\/]+\/$/, '')"
+          @contextmenu.prevent
+        >
+          <div class="file-icon">
+            <img
+              src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/folder/materialicons/36dp/2x/baseline_folder_black_36dp.png"
+              width="36"
+              height="36"
+              alt="Folder"
+            />
+          </div>
+          <span class="file-name">..</span>
+        </div>
+      </li>
+      <li v-for="folder in filteredFolders" :key="folder">
+        <div
+          tabindex="0"
+          class="file-item"
+          @click="cwd = folder"
+          @contextmenu.prevent="
+            showMenu = true;
+            focusedItem = folder;
+          "
+        >
+          <div class="file-icon">
+            <img
+              src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/folder/materialicons/36dp/2x/baseline_folder_black_36dp.png"
+              width="36"
+              height="36"
+              alt="Folder"
+            />
+          </div>
+          <span
+            class="file-name"
+            v-text="folder.match(/.*?([^/]*)\/?$/)[1]"
+          ></span>
+        </div>
+      </li>
+      <li v-for="file in filteredFiles" :key="file.key">
+        <a
+          :href="`/raw/${file.key}`"
+          target="_blank"
+          @contextmenu.prevent="
+            showMenu = true;
+            focusedItem = file;
+          "
+        >
+          <div class="file-item">
+            <div class="file-icon">
+              <img
+                v-if="file.customMetadata.thumbnail"
+                :src="`/raw/_$flaredrive$/thumbnails/${file.customMetadata.thumbnail}.png`"
+                width="36"
+                height="36"
+                alt="Image"
+                loading="lazy"
+              />
+              <svg
+                v-else-if="
+                  [
+                    'application/gzip',
+                    'application/vnd.rar',
+                    'application/zip',
+                  ].includes(file.httpMetadata.contentType)
+                "
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512"
+                width="36"
+                height="36"
+              >
+                <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M365.3 93.38l-74.63-74.64C278.6 6.742 262.3 0 245.4 0L64-.0001c-35.35 0-64 28.65-64 64l.0065 384c0 35.34 28.65 64 64 64H320c35.2 0 64-28.8 64-64V138.6C384 121.7 377.3 105.4 365.3 93.38zM336 448c0 8.836-7.164 16-16 16H64.02c-8.838 0-16-7.164-16-16L48 64.13c0-8.836 7.164-16 16-16h48V64h64V48.13h48.01L224 128c0 17.67 14.33 32 32 32h79.1V448zM176 96h-64v32h64V96zM176 160h-64v32h64V160zM176 224h-64l-30.56 116.5C73.51 379.5 103.7 416 144.3 416c40.26 0 70.45-36.3 62.68-75.15L176 224zM160 368H128c-8.836 0-16-7.164-16-16s7.164-16 16-16h32c8.836 0 16 7.164 16 16S168.8 368 160 368z"
+                />
+              </svg>
+              <svg
+                v-else-if="file.httpMetadata.contentType === 'application/pdf'"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512"
+                width="36"
+                height="36"
+              >
+                <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M320 464C328.8 464 336 456.8 336 448V416H384V448C384 483.3 355.3 512 320 512H64C28.65 512 0 483.3 0 448V416H48V448C48 456.8 55.16 464 64 464H320zM256 160C238.3 160 224 145.7 224 128V48H64C55.16 48 48 55.16 48 64V192H0V64C0 28.65 28.65 0 64 0H229.5C246.5 0 262.7 6.743 274.7 18.75L365.3 109.3C377.3 121.3 384 137.5 384 154.5V192H336V160H256zM88 224C118.9 224 144 249.1 144 280C144 310.9 118.9 336 88 336H80V368C80 376.8 72.84 384 64 384C55.16 384 48 376.8 48 368V240C48 231.2 55.16 224 64 224H88zM112 280C112 266.7 101.3 256 88 256H80V304H88C101.3 304 112 293.3 112 280zM160 240C160 231.2 167.2 224 176 224H200C226.5 224 248 245.5 248 272V336C248 362.5 226.5 384 200 384H176C167.2 384 160 376.8 160 368V240zM192 352H200C208.8 352 216 344.8 216 336V272C216 263.2 208.8 256 200 256H192V352zM336 224C344.8 224 352 231.2 352 240C352 248.8 344.8 256 336 256H304V288H336C344.8 288 352 295.2 352 304C352 312.8 344.8 320 336 320H304V368C304 376.8 296.8 384 288 384C279.2 384 272 376.8 272 368V240C272 231.2 279.2 224 288 224H336z"
+                />
+              </svg>
+              <svg
+                v-else-if="
+                  (file.httpMetadata.contentType || '').startsWith('video/')
+                "
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512"
+                width="36"
+                height="36"
+              >
+                <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M365.3 93.38l-74.63-74.64C278.6 6.742 262.3 0 245.4 0H64C28.65 0 0 28.65 0 64l.0065 384c0 35.34 28.65 64 64 64H320c35.2 0 64-28.8 64-64V138.6C384 121.7 377.3 105.4 365.3 93.38zM336 448c0 8.836-7.164 16-16 16H64.02c-8.838 0-16-7.164-16-16L48 64.13c0-8.836 7.164-16 16-16h160L224 128c0 17.67 14.33 32 32 32h79.1V448zM240 288c0-17.67-14.33-32-32-32h-96c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v-16.52l43.84 30.2C292.3 403.5 304 397.6 304 387.4V284.6c0-10.16-11.64-16.16-20.16-10.32L240 304.5V288z"
+                />
+              </svg>
+              <svg
+                v-else-if="
+                  (file.httpMetadata.contentType || '').startsWith('audio/')
+                "
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512"
+                width="36"
+                height="36"
+              >
+                <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M365.3 93.38l-74.63-74.64C278.6 6.742 262.3 0 245.4 0L64-.0001c-35.35 0-64 28.65-64 64l.0065 384c0 35.34 28.65 64 64 64H320c35.2 0 64-28.8 64-64V138.6C384 121.7 377.3 105.4 365.3 93.38zM336 448c0 8.836-7.164 16-16 16H64.02c-8.838 0-16-7.164-16-16L48 64.13c0-8.836 7.164-16 16-16h160L224 128c0 17.67 14.33 32 32 32h79.1V448zM171.5 259.5L136 296H92C85.38 296 80 301.4 80 308v56C80 370.7 85.38 376 92 376H136l35.5 36.5C179.1 420 192 414.8 192 404v-136C192 257.3 179.1 251.9 171.5 259.5zM235.1 260.7c-6.25 6.25-6.25 16.38 0 22.62C235.3 283.5 256 305.1 256 336c0 30.94-20.77 52.53-20.91 52.69c-6.25 6.25-6.25 16.38 0 22.62C238.2 414.4 242.3 416 246.4 416s8.188-1.562 11.31-4.688C258.1 410.1 288 380.5 288 336s-29.05-74.06-30.28-75.31C251.5 254.4 241.3 254.4 235.1 260.7z"
+                />
+              </svg>
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512"
+                width="36"
+                height="36"
+              >
+                <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M0 64C0 28.65 28.65 0 64 0H229.5C246.5 0 262.7 6.743 274.7 18.75L365.3 109.3C377.3 121.3 384 137.5 384 154.5V448C384 483.3 355.3 512 320 512H64C28.65 512 0 483.3 0 448V64zM336 448V160H256C238.3 160 224 145.7 224 128V48H64C55.16 48 48 55.16 48 64V448C48 456.8 55.16 464 64 464H320C328.8 464 336 456.8 336 448z"
+                />
+              </svg>
+            </div>
+            <div>
+              <div class="file-name" v-text="file.key.split('/').pop()"></div>
+              <div class="file-attr">
+                <span v-text="new Date(file.uploaded).toLocaleString()"></span>
+                <span v-text="formatSize(file.size)"></span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </li>
+    </ul>
+    <div v-if="loading" style="margin-top: 12px; text-align: center">
+      <span>Loading...</span>
+    </div>
+    <div
+      v-else-if="!filteredFiles.length && !filteredFolders.length"
+      style="margin-top: 12px; text-align: center"
+    >
+      <span>No files</span>
+    </div>
+    <div v-if="showMenu" class="contextmenu-mask" @click="showMenu = false">
+      <div class="contextmenu-container">
+        <div
+          v-text="focusedItem.key || focusedItem"
+          class="contextmenu-filename"
+          @click.stop.prevent
+        ></div>
+        <ul v-if="typeof focusedItem === 'string'" class="contextmenu-list">
+          <li>
+            <button @click="copyLink(`/?p=${encodeURIComponent(focusedItem)}`)">
+              <span>Copy Link</span>
+            </button>
+          </li>
+          <li>
+            <button
+              style="color: red"
+              @click="removeFile(focusedItem + '_$folder$')"
+            >
+              <span>Remove</span>
+            </button>
+          </li>
+        </ul>
+        <ul v-else class="contextmenu-list">
+          <li>
+            <button @click="renameFile(focusedItem.key)">
+              <span>Rename</span>
+            </button>
+          </li>
+          <li>
+            <a :href="`/raw/${focusedItem.key}`" target="_blank" download>
+              <span>Download</span>
+            </a>
+          </li>
+          <li>
+            <button @click="copyLink(`/raw/${focusedItem.key}`)">
+              <span>Copy Link</span>
+            </button>
+          </li>
+          <li>
+            <button style="color: red" @click="removeFile(focusedItem.key)">
+              <span>Remove</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import {
+  generateThumbnail,
+  blobDigest,
+  multipartUpload,
+  SIZE_LIMIT,
+} from "/assets/main.mjs";
+
+export default {
+  data: () => ({
+    cwd: new URL(window.location).searchParams.get("p") || "",
+    files: [],
+    folders: [],
+    focusedItem: null,
+    loading: false,
+    search: "",
+    showMenu: false,
+    uploadProgress: null,
+    uploadQueue: [],
+  }),
+
+  computed: {
+    filteredFiles() {
+      let files = this.files;
+      if (this.search) {
+        files = files.filter((file) =>
+          file.key.split("/").pop().includes(this.search)
+        );
+      }
+      return files;
+    },
+
+    filteredFolders() {
+      let folders = this.folders;
+      if (this.search) {
+        folders = folders.filter((folder) => folder.includes(this.search));
+      }
+      return folders;
+    },
+  },
+
+  methods: {
+    copyLink(link) {
+      const url = new URL(link, window.location.origin);
+      navigator.clipboard.writeText(url.toString());
+    },
+
+    async createFolder() {
+      try {
+        const folderName = window.prompt("Folder name");
+        if (!folderName) return;
+        const uploadUrl = `/api/write/items/${this.cwd}${folderName}/_$folder$`;
+        await axios.put(uploadUrl, "");
+        this.fetchFiles();
+      } catch (error) {
+        fetch("/api/write/")
+          .then((value) => {
+            if (value.redirected) window.location.href = value.url;
+          })
+          .catch(() => {});
+        console.log(`Create folder failed`);
+      }
+    },
+
+    fetchFiles() {
+      this.files = [];
+      this.folders = [];
+      this.loading = true;
+      fetch(`/api/children/${this.cwd}`)
+        .then((res) => res.json())
+        .then((files) => {
+          this.files = files.value;
+          this.folders = files.folders;
+          this.loading = false;
+        });
+    },
+
+    formatSize(size) {
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      let i = 0;
+      while (size >= 1024) {
+        size /= 1024;
+        i++;
+      }
+      return `${size.toFixed(1)} ${units[i]}`;
+    },
+
+    onDrop(ev) {
+      let files;
+      if (ev.dataTransfer.items) {
+        files = [...ev.dataTransfer.items]
+          .filter((item) => item.kind === "file")
+          .map((item) => item.getAsFile());
+      } else files = ev.dataTransfer.files;
+      this.uploadFiles(files);
+    },
+
+    onUploadClicked() {
+      const fileElement = document.getElementById("file");
+      if (!fileElement.value) return;
+      this.uploadFiles(fileElement.files);
+      fileElement.value = null;
+    },
+
+    async processUploadQueue() {
+      if (!this.uploadQueue.length) {
+        this.fetchFiles();
+        this.uploadProgress = null;
+        return;
+      }
+
+      /** @type File **/
+      const file = this.uploadQueue.pop(0);
+      let thumbnailDigest = null;
+
+      if (file.type.startsWith("image/") || file.type === "video/mp4") {
+        try {
+          const thumbnailBlob = await generateThumbnail(file);
+          const digestHex = await blobDigest(thumbnailBlob);
+
+          const thumbnailUploadUrl = `/api/write/items/_$flaredrive$/thumbnails/${digestHex}.png`;
+          try {
+            await axios.put(thumbnailUploadUrl, thumbnailBlob);
+            thumbnailDigest = digestHex;
+          } catch (error) {
+            fetch("/api/write/")
+              .then((value) => {
+                if (value.redirected) window.location.href = value.url;
+              })
+              .catch(() => {});
+            console.log(`Upload ${digestHex}.png failed`);
+          }
+        } catch (error) {
+          console.log(`Generate thumbnail failed`);
+        }
+      }
+
+      try {
+        const uploadUrl = `/api/write/items/${this.cwd}${file.name}`;
+        const headers = {};
+        const onUploadProgress = (progressEvent) => {
+          var percentCompleted =
+            (progressEvent.loaded * 100) / progressEvent.total;
+          this.uploadProgress = percentCompleted;
+        };
+        if (thumbnailDigest) headers["fd-thumbnail"] = thumbnailDigest;
+        if (file.size >= SIZE_LIMIT) {
+          await multipartUpload(`${this.cwd}${file.name}`, file, {
+            headers,
+            onUploadProgress,
+          });
+        } else {
+          await axios.put(uploadUrl, file, { headers, onUploadProgress });
+        }
+      } catch (error) {
+        fetch("/api/write/")
+          .then((value) => {
+            if (value.redirected) window.location.href = value.url;
+          })
+          .catch(() => {});
+        console.log(`Upload ${file.name} failed`, error);
+      }
+      setTimeout(this.processUploadQueue);
+    },
+
+    async removeFile(key) {
+      await axios.delete(`/api/write/items/${key}`);
+      this.fetchFiles();
+    },
+
+    async renameFile(key) {
+      const newName = window.prompt("Rename to:");
+      if (!newName) return;
+      const uploadUrl = `/api/write/items/${this.cwd}${newName}`;
+      await axios.put(uploadUrl, "", {
+        headers: { "x-amz-copy-source": encodeURIComponent(key) },
+      });
+      await axios.delete(`/api/write/items/${key}`);
+      this.fetchFiles();
+    },
+
+    uploadFiles(files) {
+      if (this.cwd && !this.cwd.endsWith("/")) this.cwd += "/";
+
+      this.uploadQueue.push(...files);
+      setTimeout(() => this.processUploadQueue());
+    },
+  },
+
+  watch: {
+    cwd: {
+      handler() {
+        this.fetchFiles();
+        const url = new URL(window.location);
+        if ((url.searchParams.get("p") || "") !== this.cwd) {
+          this.cwd
+            ? url.searchParams.set("p", this.cwd)
+            : url.searchParams.delete("p");
+          window.history.pushState(null, "", url.toString());
+        }
+        document.title = `${
+          this.cwd.replace(/.*\/(?!$)|\//g, "") || "/"
+        } - FlareDrive`;
+      },
+      immediate: true,
+    },
+  },
+
+  created() {
+    window.addEventListener("popstate", (ev) => {
+      const searchParams = new URL(window.location).searchParams;
+      if (searchParams.get("p") !== this.cwd)
+        this.cwd = searchParams.get("p") || "";
+    });
+  },
+};
+</script>
