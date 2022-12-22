@@ -27,10 +27,29 @@
       />
       <input type="file" id="file" multiple hidden @change="onUploadClicked" />
     </label>
-    <div
-      style="position: sticky; top: 0; padding: 8px; background-color: white"
-    >
+    <div class="app-bar">
       <input type="search" v-model="search" aria-label="Search" />
+      <div class="menu-button">
+        <button aria-label="Menu" @click="showMenu = true">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+            width="24"
+            height="24"
+            style="display: block"
+          >
+            <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M120 256c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm160 0c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm104 56c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56z"
+            />
+          </svg>
+        </button>
+        <Menu
+          v-model="showMenu"
+          :items="[{ text: 'Name' }, { text: 'Size' }]"
+          @click="onMenuClick"
+        />
+      </div>
     </div>
     <ul class="file-list">
       <li v-if="cwd !== ''">
@@ -57,7 +76,7 @@
           class="file-item"
           @click="cwd = folder"
           @contextmenu.prevent="
-            showMenu = true;
+            showContextMenu = true;
             focusedItem = folder;
           "
         >
@@ -80,7 +99,7 @@
           :href="`/raw/${file.key}`"
           target="_blank"
           @contextmenu.prevent="
-            showMenu = true;
+            showContextMenu = true;
             focusedItem = file;
           "
         >
@@ -113,7 +132,11 @@
     >
       <span>No files</span>
     </div>
-    <div v-if="showMenu" class="contextmenu-mask" @click="showMenu = false">
+    <div
+      v-if="showContextMenu"
+      class="contextmenu-mask"
+      @click="showContextMenu = false"
+    >
       <div class="contextmenu-container">
         <div
           v-text="focusedItem.key || focusedItem"
@@ -169,6 +192,7 @@ import {
   multipartUpload,
   SIZE_LIMIT,
 } from "/assets/main.mjs";
+import Menu from "./Menu.vue";
 import MimeIcon from "./MimeIcon.vue";
 
 export default {
@@ -178,7 +202,9 @@ export default {
     folders: [],
     focusedItem: null,
     loading: false,
+    order: null,
     search: "",
+    showContextMenu: false,
     showMenu: false,
     uploadProgress: null,
     uploadQueue: [],
@@ -235,6 +261,13 @@ export default {
         .then((res) => res.json())
         .then((files) => {
           this.files = files.value;
+          if (this.order) {
+            this.files.sort((a, b) => {
+              if (this.order === "size") {
+                return b.size - a.size;
+              }
+            });
+          }
           this.folders = files.folders;
           this.loading = false;
         });
@@ -258,6 +291,24 @@ export default {
           .map((item) => item.getAsFile());
       } else files = ev.dataTransfer.files;
       this.uploadFiles(files);
+    },
+
+    onMenuClick(text) {
+      switch (text) {
+        case "Name":
+          this.order = null;
+          break;
+        case "Size":
+          this.order = "size";
+          break;
+      }
+      this.files.sort((a, b) => {
+        if (this.order === "size") {
+          return b.size - a.size;
+        } else {
+          return a.key.localeCompare(b.key);
+        }
+      });
     },
 
     onUploadClicked() {
@@ -384,6 +435,7 @@ export default {
   },
 
   components: {
+    Menu,
     MimeIcon,
   },
 };
@@ -392,5 +444,25 @@ export default {
 <style>
 .main {
   height: 100%;
+}
+
+.app-bar {
+  position: sticky;
+  top: 0;
+  padding: 8px;
+  background-color: white;
+  display: flex;
+}
+
+.menu-button {
+  display: flex;
+  position: relative;
+  margin-left: 8px;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
 }
 </style>
