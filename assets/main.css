@@ -46,9 +46,9 @@ a {
 input[type="search"] {
   background-color: whitesmoke;
   border: none;
-  border-radius: 6px;
+  border-radius: 16px;
   width: 100%;
-  padding: 8px;
+  padding: 8px 12px;
 }
 
 .file-item {
@@ -112,7 +112,7 @@ progress {
   background-color: rgb(243, 128, 32);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .upload-button {
@@ -171,7 +171,7 @@ button {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.25s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
