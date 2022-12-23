@@ -1,3 +1,20 @@
+<script setup>
+defineProps({
+  contentType: {
+    type: String,
+    default: "",
+  },
+  thumbnail: {
+    type: String,
+    default: "",
+  },
+  size: {
+    type: Number,
+    default: 36,
+  },
+});
+</script>
+
 <template>
   <div class="file-icon">
     <img
@@ -45,23 +62,3 @@
     </svg>
   </div>
 </template>
-
-<script>
-export default {
-  name: "MimeIcon",
-  props: {
-    contentType: {
-      type: String,
-      default: "",
-    },
-    thumbnail: {
-      type: String,
-      default: "",
-    },
-    size: {
-      type: Number,
-      default: 36,
-    },
-  },
-};
-</script>

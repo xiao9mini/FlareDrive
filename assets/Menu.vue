@@ -9,6 +9,7 @@ defineProps({
 
 const emit = defineEmits(["update:modelValue", "click"]);
 </script>
+
 <template>
   <div class="menu">
     <Transition name="fade">
