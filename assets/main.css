@@ -183,3 +183,16 @@ button {
 .fade-leave-from {
   opacity: 1;
 }
+
+.slide-up-enter-active {
+  transition: transform 0.2s ease-out;
+}
+
+.slide-up-leave-active {
+  transition: transform 0.2s ease-in;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+}

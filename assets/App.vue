@@ -5,18 +5,12 @@
       :value="uploadProgress"
       max="100"
     ></progress>
-    <label class="create-folder-button" tabindex="0">
-      <img
-        style="filter: invert(100%)"
-        src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/create_new_folder/materialicons/36dp/2x/baseline_create_new_folder_black_36dp.png"
-        alt="Create folder"
-        width="36"
-        height="36"
-        @contextmenu.prevent
-      />
-      <button hidden @click="createFolder"></button>
-    </label>
-    <label class="upload-button" tabindex="0">
+    <UploadPopup
+      v-model="showUploadPopup"
+      @upload="onUploadClicked"
+      @createFolder="createFolder"
+    ></UploadPopup>
+    <button class="upload-button" @click="showUploadPopup = true">
       <img
         style="filter: invert(100%)"
         src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/upload_file/materialicons/36dp/2x/baseline_upload_file_black_36dp.png"
@@ -25,8 +19,7 @@
         height="36"
         @contextmenu.prevent
       />
-      <input type="file" id="file" multiple hidden @change="onUploadClicked" />
-    </label>
+    </button>
     <div class="app-bar">
       <input type="search" v-model="search" aria-label="Search" />
       <div class="menu-button">
@@ -194,6 +187,7 @@ import {
 } from "/assets/main.mjs";
 import Menu from "./Menu.vue";
 import MimeIcon from "./MimeIcon.vue";
+import UploadPopup from "./UploadPopup.vue";
 
 export default {
   data: () => ({
@@ -206,6 +200,7 @@ export default {
     search: "",
     showContextMenu: false,
     showMenu: false,
+    showUploadPopup: false,
     uploadProgress: null,
     uploadQueue: [],
   }),
@@ -240,6 +235,7 @@ export default {
       try {
         const folderName = window.prompt("Folder name");
         if (!folderName) return;
+        this.showUploadPopup = false;
         const uploadUrl = `/api/write/items/${this.cwd}${folderName}/_$folder$`;
         await axios.put(uploadUrl, "");
         this.fetchFiles();
@@ -311,10 +307,10 @@ export default {
       });
     },
 
-    onUploadClicked() {
-      const fileElement = document.getElementById("file");
+    onUploadClicked(fileElement) {
       if (!fileElement.value) return;
       this.uploadFiles(fileElement.files);
+      this.showUploadPopup = false;
       fileElement.value = null;
     },
 
@@ -437,6 +433,7 @@ export default {
   components: {
     Menu,
     MimeIcon,
+    UploadPopup,
   },
 };
 </script>
