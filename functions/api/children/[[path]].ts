@@ -3,10 +3,11 @@ import { notFound, parseBucketPath } from "@/utils/bucket";
 export async function onRequestGet(context) {
   try {
     const [bucket, path] = parseBucketPath(context);
-    if (!bucket) return notFound();
+    const prefix = path && `${path}/`;
+    if (!bucket || prefix.startsWith("_$flaredrive$/")) return notFound();
 
     const objList = await bucket.list({
-      prefix: path && `${path}/`,
+      prefix,
       delimiter: "/",
       include: ["httpMetadata", "customMetadata"],
     });
