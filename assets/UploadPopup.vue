@@ -9,15 +9,15 @@ const emit = defineEmits(["update:modelValue", "upload", "createFolder"]);
   <div class="popup">
     <Transition name="fade">
       <div
-        v-show="modelValue"
+        v-if="modelValue"
         class="popup-modal"
         @click="emit('update:modelValue', false)"
       ></div>
     </Transition>
     <Transition name="slide-up">
-      <div v-show="modelValue" class="popup-content">
+      <div v-if="modelValue" class="popup-content">
         <div class="button-grid">
-          <label>
+          <button onclick="this.lastElementChild.click()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
               <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
               <path
@@ -32,8 +32,8 @@ const emit = defineEmits(["update:modelValue", "upload", "createFolder"]);
               hidden
               @change="emit('upload', $event.target)"
             />
-          </label>
-          <label>
+          </button>
+          <button onclick="this.lastElementChild.click()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
               <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
               <path
@@ -48,8 +48,8 @@ const emit = defineEmits(["update:modelValue", "upload", "createFolder"]);
               hidden
               @change="emit('upload', $event.target)"
             />
-          </label>
-          <label>
+          </button>
+          <button onclick="this.lastElementChild.click()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
               <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
               <path
@@ -64,8 +64,8 @@ const emit = defineEmits(["update:modelValue", "upload", "createFolder"]);
               hidden
               @change="emit('upload', $event.target)"
             />
-          </label>
-          <label>
+          </button>
+          <button type="button" @click="emit('createFolder')">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
               <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
               <path
@@ -73,8 +73,7 @@ const emit = defineEmits(["update:modelValue", "upload", "createFolder"]);
               />
             </svg>
             <span>Create Folder</span>
-            <button type="button" hidden @click="emit('createFolder')" />
-          </label>
+          </button>
         </div>
       </div>
     </Transition>
@@ -108,12 +107,11 @@ const emit = defineEmits(["update:modelValue", "upload", "createFolder"]);
   padding: 8px;
 }
 
-.popup label {
+.popup button {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  cursor: pointer;
   font-size: 12px;
 }
 
