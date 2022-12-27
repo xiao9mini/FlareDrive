@@ -10,7 +10,7 @@
       @upload="onUploadClicked"
       @createFolder="createFolder"
     ></UploadPopup>
-    <button class="upload-button" @click="showUploadPopup = true">
+    <button class="upload-button circle" @click="showUploadPopup = true">
       <img
         style="filter: invert(100%)"
         src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/upload_file/materialicons/36dp/2x/baseline_upload_file_black_36dp.png"
@@ -23,13 +23,14 @@
     <div class="app-bar">
       <input type="search" v-model="search" aria-label="Search" />
       <div class="menu-button">
-        <button aria-label="Menu" @click="showMenu = true">
+        <button class="circle" @click="showMenu = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
             width="24"
             height="24"
-            style="display: block"
+            title="Menu"
+            style="display: block; margin: 4px"
           >
             <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
@@ -454,7 +455,15 @@ export default {
 .menu-button {
   display: flex;
   position: relative;
-  margin-left: 8px;
+  margin-left: 4px;
+}
+
+.menu-button > button {
+  transition: background-color 0.2s ease;
+}
+
+.menu-button > button:hover {
+  background-color: whitesmoke;
 }
 
 .menu {

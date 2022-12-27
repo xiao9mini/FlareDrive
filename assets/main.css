@@ -101,6 +101,10 @@ progress {
   width: 100%;
 }
 
+button.circle {
+  border-radius: 50%;
+}
+
 .upload-button,
 .create-folder-button {
   position: fixed;
@@ -110,7 +114,6 @@ progress {
   align-items: center;
   justify-content: center;
   background-color: rgb(243, 128, 32);
-  border-radius: 50%;
   cursor: pointer;
   box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
 }
