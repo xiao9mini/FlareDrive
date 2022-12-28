@@ -126,56 +126,50 @@
     >
       <span>No files</span>
     </div>
-    <div
-      v-if="showContextMenu"
-      class="contextmenu-mask"
-      @click="showContextMenu = false"
-    >
-      <div class="contextmenu-container">
-        <div
-          v-text="focusedItem.key || focusedItem"
-          class="contextmenu-filename"
-          @click.stop.prevent
-        ></div>
-        <ul v-if="typeof focusedItem === 'string'" class="contextmenu-list">
-          <li>
-            <button @click="copyLink(`/?p=${encodeURIComponent(focusedItem)}`)">
-              <span>Copy Link</span>
-            </button>
-          </li>
-          <li>
-            <button
-              style="color: red"
-              @click="removeFile(focusedItem + '_$folder$')"
-            >
-              <span>Remove</span>
-            </button>
-          </li>
-        </ul>
-        <ul v-else class="contextmenu-list">
-          <li>
-            <button @click="renameFile(focusedItem.key)">
-              <span>Rename</span>
-            </button>
-          </li>
-          <li>
-            <a :href="`/raw/${focusedItem.key}`" target="_blank" download>
-              <span>Download</span>
-            </a>
-          </li>
-          <li>
-            <button @click="copyLink(`/raw/${focusedItem.key}`)">
-              <span>Copy Link</span>
-            </button>
-          </li>
-          <li>
-            <button style="color: red" @click="removeFile(focusedItem.key)">
-              <span>Remove</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <Dialog v-model="showContextMenu">
+      <div
+        v-text="focusedItem.key || focusedItem"
+        class="contextmenu-filename"
+        @click.stop.prevent
+      ></div>
+      <ul v-if="typeof focusedItem === 'string'" class="contextmenu-list">
+        <li>
+          <button @click="copyLink(`/?p=${encodeURIComponent(focusedItem)}`)">
+            <span>Copy Link</span>
+          </button>
+        </li>
+        <li>
+          <button
+            style="color: red"
+            @click="removeFile(focusedItem + '_$folder$')"
+          >
+            <span>Remove</span>
+          </button>
+        </li>
+      </ul>
+      <ul v-else class="contextmenu-list">
+        <li>
+          <button @click="renameFile(focusedItem.key)">
+            <span>Rename</span>
+          </button>
+        </li>
+        <li>
+          <a :href="`/raw/${focusedItem.key}`" target="_blank" download>
+            <span>Download</span>
+          </a>
+        </li>
+        <li>
+          <button @click="copyLink(`/raw/${focusedItem.key}`)">
+            <span>Copy Link</span>
+          </button>
+        </li>
+        <li>
+          <button style="color: red" @click="removeFile(focusedItem.key)">
+            <span>Remove</span>
+          </button>
+        </li>
+      </ul>
+    </Dialog>
   </div>
 </template>
 
@@ -186,6 +180,7 @@ import {
   multipartUpload,
   SIZE_LIMIT,
 } from "/assets/main.mjs";
+import Dialog from "./Dialog.vue";
 import Menu from "./Menu.vue";
 import MimeIcon from "./MimeIcon.vue";
 import UploadPopup from "./UploadPopup.vue";
@@ -432,6 +427,7 @@ export default {
   },
 
   components: {
+    Dialog,
     Menu,
     MimeIcon,
     UploadPopup,

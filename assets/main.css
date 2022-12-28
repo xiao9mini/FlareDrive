@@ -9,10 +9,12 @@ body,
 }
 
 body {
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Adjusted",
+    "Segoe UI", "Liberation Sans", sans-serif;
   margin: 0;
 }
 
+/* Hide the app until it's ready */
 #app:not([data-v-app]) {
   display: none;
 }
@@ -128,28 +130,9 @@ button.circle {
   bottom: 80px;
 }
 
-.contextmenu-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9998;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.contextmenu-container {
-  background-color: white;
-  width: 300px;
-  padding: 8px 0;
-  border-radius: 8px;
-}
-
 .contextmenu-filename {
   padding: 12px;
+  min-width: 256px;
 }
 
 .contextmenu-list > li > * {
