@@ -372,6 +372,7 @@ export default {
     },
 
     async removeFile(key) {
+      if (!window.confirm(`Delete ${key} permanently?`)) return;
       await axios.delete(`/api/write/items/${key}`);
       this.fetchFiles();
     },
