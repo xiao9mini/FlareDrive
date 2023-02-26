@@ -40,7 +40,7 @@
         </button>
         <Menu
           v-model="showMenu"
-          :items="[{ text: 'Name' }, { text: 'Size' }]"
+          :items="[{ text: 'Name' }, { text: 'Size' }, { text: 'Paste' }]"
           @click="onMenuClick"
         />
       </div>
@@ -154,6 +154,11 @@
           </button>
         </li>
         <li>
+          <button @click="clipboard = focusedItem.key">
+            <span>Copy</span>
+          </button>
+        </li>
+        <li>
           <a :href="`/raw/${focusedItem.key}`" target="_blank" download>
             <span>Download</span>
           </a>
@@ -187,6 +192,7 @@ import UploadPopup from "./UploadPopup.vue";
 
 export default {
   data: () => ({
+    clipboard: null,
     cwd: new URL(window.location).searchParams.get("p") || "",
     files: [],
     folders: [],
@@ -225,6 +231,13 @@ export default {
     copyLink(link) {
       const url = new URL(link, window.location.origin);
       navigator.clipboard.writeText(url.toString());
+    },
+
+    async copyPaste(source, target) {
+      const uploadUrl = `/api/write/items/${target}`;
+      await axios.put(uploadUrl, "", {
+        headers: { "x-amz-copy-source": encodeURIComponent(source) },
+      });
     },
 
     async createFolder() {
@@ -293,14 +306,12 @@ export default {
         case "Size":
           this.order = "size";
           break;
+        case "Paste":
+          return this.pasteFile();
       }
-      this.files.sort((a, b) => {
-        if (this.order === "size") {
-          return b.size - a.size;
-        } else {
-          return a.key.localeCompare(b.key);
-        }
-      });
+      let compareFn = undefined;
+      if (this.order === "size") compareFn = (a, b) => b.size - a.size;
+      this.files.sort(compareFn);
     },
 
     onUploadClicked(fileElement) {
@@ -308,6 +319,15 @@ export default {
       this.uploadFiles(fileElement.files);
       this.showUploadPopup = false;
       fileElement.value = null;
+    },
+
+    async pasteFile() {
+      if (!this.clipboard) return;
+      let newName = window.prompt("Rename to:");
+      if (newName === null) return;
+      if (newName === "") newName = this.clipboard.split("/").pop();
+      await this.copyPaste(this.clipboard, `${this.cwd}${newName}`);
+      this.fetchFiles();
     },
 
     async processUploadQueue() {
@@ -380,10 +400,7 @@ export default {
     async renameFile(key) {
       const newName = window.prompt("Rename to:");
       if (!newName) return;
-      const uploadUrl = `/api/write/items/${this.cwd}${newName}`;
-      await axios.put(uploadUrl, "", {
-        headers: { "x-amz-copy-source": encodeURIComponent(key) },
-      });
+      await this.copyPaste(key, `${this.cwd}${newName}`);
       await axios.delete(`/api/write/items/${key}`);
       this.fetchFiles();
     },
