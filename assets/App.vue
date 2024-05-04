@@ -1,111 +1,57 @@
 <template>
   <div class="main" @dragenter.prevent @dragover.prevent @drop.prevent="onDrop">
-    <progress
-      v-if="uploadProgress !== null"
-      :value="uploadProgress"
-      max="100"
-    ></progress>
-    <UploadPopup
-      v-model="showUploadPopup"
-      @upload="onUploadClicked"
-      @createFolder="createFolder"
-    ></UploadPopup>
+    <progress v-if="uploadProgress !== null" :value="uploadProgress" max="100"></progress>
+    <UploadPopup v-model="showUploadPopup" @upload="onUploadClicked" @createFolder="createFolder"></UploadPopup>
     <button class="upload-button circle" @click="showUploadPopup = true">
-      <img
-        style="filter: invert(100%)"
+      <img style="filter: invert(100%)"
         src="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/png/file/upload_file/materialicons/36dp/2x/baseline_upload_file_black_36dp.png"
-        alt="Upload"
-        width="36"
-        height="36"
-        @contextmenu.prevent
-      />
+        alt="Upload" width="36" height="36" @contextmenu.prevent />
     </button>
     <div class="app-bar">
       <input type="search" v-model="search" aria-label="Search" />
       <div class="menu-button">
         <button class="circle" @click="showMenu = true">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 448 512"
-            width="24"
-            height="24"
-            title="Menu"
-            style="display: block; margin: 4px"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" title="Menu"
+            style="display: block; margin: 4px">
             <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
-              d="M120 256c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm160 0c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm104 56c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56z"
-            />
+              d="M120 256c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm160 0c0 30.9-25.1 56-56 56s-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56zm104 56c-30.9 0-56-25.1-56-56s25.1-56 56-56s56 25.1 56 56s-25.1 56-56 56z" />
           </svg>
         </button>
-        <Menu
-          v-model="showMenu"
-          :items="[{ text: 'Name' }, { text: 'Size' }, { text: 'Paste' }]"
-          @click="onMenuClick"
-        />
+        <Menu v-model="showMenu" :items="[{ text: 'Name' }, { text: 'Size' }, { text: 'Paste' }]"
+          @click="onMenuClick" />
       </div>
     </div>
     <ul class="file-list">
       <li v-if="cwd !== ''">
-        <div
-          tabindex="0"
-          class="file-item"
-          @click="cwd = cwd.replace(/[^\/]+\/$/, '')"
-          @contextmenu.prevent
-        >
+        <div tabindex="0" class="file-item" @click="cwd = cwd.replace(/[^\/]+\/$/, '')" @contextmenu.prevent>
           <div class="file-icon">
-            <img
-              src="/assets/folder_back_icon.png"
-              width="36"
-              height="36"
-              alt="Folder"
-            />
+            <img src="/assets/folder_back_icon.png" width="36" height="36" alt="Folder" />
           </div>
           <span class="file-name">..</span>
         </div>
       </li>
       <li v-for="folder in filteredFolders" :key="folder">
-        <div
-          tabindex="0"
-          class="file-item"
-          @click="cwd = folder"
-          @contextmenu.prevent="
-            showContextMenu = true;
-            focusedItem = folder;
-          "
-        >
+        <div tabindex="0" class="file-item" @click="cwd = folder" @contextmenu.prevent="
+          showContextMenu = true;
+        focusedItem = folder;
+        ">
           <div class="file-icon">
-            <img
-              src="/assets/folder_icon.png"
-              width="36"
-              height="36"
-              alt="Folder"
-            />
+            <img src="/assets/folder_icon.png" width="36" height="36" alt="Folder" />
           </div>
-          <span
-            class="file-name"
-            v-text="folder.match(/.*?([^/]*)\/?$/)[1]"
-          ></span>
+          <span class="file-name" v-text="folder.match(/.*?([^/]*)\/?$/)[1]"></span>
         </div>
       </li>
       <li v-for="file in filteredFiles" :key="file.key">
-        <a
-          :href="`/raw/${file.key}`"
-          target="_blank"
-          @contextmenu.prevent="
-            showContextMenu = true;
-            focusedItem = file;
-          "
-        >
+        <a :href="`/raw/${file.key}`" target="_blank" @contextmenu.prevent="
+          showContextMenu = true;
+        focusedItem = file;
+        ">
           <div class="file-item">
-            <MimeIcon
-              :content-type="file.httpMetadata.contentType"
-              :thumbnail="
-                file.customMetadata.thumbnail
-                  ? `/raw/_$flaredrive$/thumbnails/${file.customMetadata.thumbnail}.png`
-                  : null
-              "
-            />
+            <MimeIcon :content-type="file.httpMetadata.contentType" :thumbnail="file.customMetadata.thumbnail
+                ? `/raw/_$flaredrive$/thumbnails/${file.customMetadata.thumbnail}.png`
+                : null
+              " />
             <div>
               <div class="file-name" v-text="file.key.split('/').pop()"></div>
               <div class="file-attr">
@@ -120,18 +66,11 @@
     <div v-if="loading" style="margin-top: 12px; text-align: center">
       <span>Loading...</span>
     </div>
-    <div
-      v-else-if="!filteredFiles.length && !filteredFolders.length"
-      style="margin-top: 12px; text-align: center"
-    >
+    <div v-else-if="!filteredFiles.length && !filteredFolders.length" style="margin-top: 12px; text-align: center">
       <span>No files</span>
     </div>
     <Dialog v-model="showContextMenu">
-      <div
-        v-text="focusedItem.key || focusedItem"
-        class="contextmenu-filename"
-        @click.stop.prevent
-      ></div>
+      <div v-text="focusedItem.key || focusedItem" class="contextmenu-filename" @click.stop.prevent></div>
       <ul v-if="typeof focusedItem === 'string'" class="contextmenu-list">
         <li>
           <button @click="copyLink(`/?p=${encodeURIComponent(focusedItem)}`)">
@@ -139,10 +78,7 @@
           </button>
         </li>
         <li>
-          <button
-            style="color: red"
-            @click="removeFile(focusedItem + '_$folder$')"
-          >
+          <button style="color: red" @click="removeFile(focusedItem + '_$folder$')">
             <span>Remove</span>
           </button>
         </li>
@@ -231,7 +167,8 @@ export default {
     copyLink(link) {
       const u1 = new URL(link, window.location.origin);
       let url;
-      if (u1.toString().includes('/raw/')) {
+      const imgExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
+      if (u1.toString().includes('/raw/') && imgExtensions.includes(path.toLowerCase().split('.').pop())) {
         let u2 = u1.toString().split("/raw/")[1];
         let u2Length = u2.length % 4;
         url = "https://i" + u2Length + ".wp.com/s3.1314234.xyz/" + u2
@@ -261,7 +198,7 @@ export default {
           .then((value) => {
             if (value.redirected) window.location.href = value.url;
           })
-          .catch(() => {});
+          .catch(() => { });
         console.log(`Create folder failed`);
       }
     },
@@ -363,7 +300,7 @@ export default {
               .then((value) => {
                 if (value.redirected) window.location.href = value.url;
               })
-              .catch(() => {});
+              .catch(() => { });
             console.log(`Upload ${digestHex}.png failed`);
           }
         } catch (error) {
@@ -393,7 +330,7 @@ export default {
           .then((value) => {
             if (value.redirected) window.location.href = value.url;
           })
-          .catch(() => {});
+          .catch(() => { });
         console.log(`Upload ${file.name} failed`, error);
       }
       setTimeout(this.processUploadQueue);
@@ -436,9 +373,8 @@ export default {
             : url.searchParams.delete("p");
           window.history.pushState(null, "", url.toString());
         }
-        document.title = `${
-          this.cwd.replace(/.*\/(?!$)|\//g, "") || "/"
-        } - FlareDrive`;
+        document.title = `${this.cwd.replace(/.*\/(?!$)|\//g, "") || "/"
+          } - FlareDrive`;
       },
       immediate: true,
     },
@@ -480,11 +416,11 @@ export default {
   margin-left: 4px;
 }
 
-.menu-button > button {
+.menu-button>button {
   transition: background-color 0.2s ease;
 }
 
-.menu-button > button:hover {
+.menu-button>button:hover {
   background-color: whitesmoke;
 }
 
