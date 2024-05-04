@@ -1,24 +1,31 @@
 import { notFound, parseBucketPath } from "@/utils/bucket";
 
 export async function onRequestGet(context) {
-  const [bucket, path] = parseBucketPath(context);
-  if (!bucket) return notFound();
-  const url = context.env["PUBURL"] + "/" + context.request.url.split("/raw/")[1]
-  var response = await fetch(new Request(url, {
-    body: context.request.body,
-    headers: context.request.headers,
-    method: context.request.method,
-    redirect: "follow",
-  }))
-  
-  const headers = new Headers(response.headers);
-  if (path.startsWith("_$flaredrive$/thumbnails/")) {
-    headers.set("Cache-Control", "max-age=31536000");
-  }
+  try {
+    const [bucket, path] = parseBucketPath(context);
+    const prefix = path && `${path}/`;
+    if (!bucket || prefix.startsWith("_$flaredrive$/")) return notFound();
 
-  return new Response(response.body, {
-    headers: headers,
-    status: response.status,
-    statusText: response.statusText
-  });
+    const objList = await bucket.list({
+      prefix,
+      delimiter: "/",
+      include: ["httpMetadata", "customMetadata"],
+    });
+    const objKeys = objList.objects
+      .filter((obj) => !obj.key.endsWith("/_$folder$"))
+      .map((obj) => {
+        const { key, size, uploaded, httpMetadata, customMetadata } = obj;
+        return { key, size, uploaded, httpMetadata, customMetadata };
+      });
+
+    let folders = objList.delimitedPrefixes;
+    if (!path)
+      folders = folders.filter((folder) => folder !== "_$flaredrive$/");
+
+    return new Response(JSON.stringify({ value: objKeys, folders }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    return new Response(e.toString(), { status: 500 });
+  }
 }
