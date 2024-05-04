@@ -229,8 +229,8 @@ export default {
 
   methods: {
     copyLink(link) {
-      const url = new URL(link, window.location.origin);
-      navigator.clipboard.writeText(url.toString());
+      const url = context.env["PUBURL"] + "/" + window.location.origin.split("/raw/")[1]
+      navigator.clipboard.writeText(url);
     },
 
     async copyPaste(source, target) {
