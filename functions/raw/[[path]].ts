@@ -4,7 +4,7 @@ export async function onRequestGet(context) {
   const [bucket, path] = parseBucketPath(context);
   if (!bucket) return notFound();
   let u2 = context.request.url.split("/raw/")[1]
-  const imgExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
+  const imgExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp']
 
   if (imgExtensions.includes(u2.toLowerCase().split('.').pop())) {
     let u2Length = u2.length % 4;

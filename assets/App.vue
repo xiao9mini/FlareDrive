@@ -168,7 +168,7 @@ export default {
       const u1 = new URL(link, window.location.origin);
       let u2 = u1.toString().split("/raw/")[1];
       let url;
-      const imgExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
+      const imgExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
       if (u1.toString().includes('/raw/') && imgExtensions.includes(u2.toLowerCase().split('.').pop())) {
         let u2Length = u2.length % 4;
         url = "https://i" + u2Length + ".wp.com/s3.1314234.xyz/" + u2
