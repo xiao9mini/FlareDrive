@@ -49,8 +49,8 @@
         ">
           <div class="file-item">
             <MimeIcon :content-type="file.httpMetadata.contentType" :thumbnail="file.customMetadata.thumbnail
-                ? `/raw/_$flaredrive$/thumbnails/${file.customMetadata.thumbnail}.png`
-                : null
+              ? `/raw/_$flaredrive$/thumbnails/${file.customMetadata.thumbnail}.png`
+              : null
               " />
             <div>
               <div class="file-name" v-text="file.key.split('/').pop()"></div>
@@ -166,10 +166,10 @@ export default {
   methods: {
     copyLink(link) {
       const u1 = new URL(link, window.location.origin);
+      let u2 = u1.toString().split("/raw/")[1];
       let url;
       const imgExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
-      if (u1.toString().includes('/raw/') && imgExtensions.includes(path.toLowerCase().split('.').pop())) {
-        let u2 = u1.toString().split("/raw/")[1];
+      if (u1.toString().includes('/raw/') && imgExtensions.includes(u2.toLowerCase().split('.').pop())) {
         let u2Length = u2.length % 4;
         url = "https://i" + u2Length + ".wp.com/s3.1314234.xyz/" + u2
       } else {
