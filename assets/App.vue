@@ -234,7 +234,7 @@ export default {
       if (u1.toString().includes('/raw/')) {
         let u2 = u1.toString().split("/raw/")[1];
         let u2Length = u2.length % 4;
-        url = "https://i" + u2Length + ".wp.com/" + process.env.PUBURL + "/" + u2
+        url = "https://i" + u2Length + ".wp.com/s3.1314234.xyz/" + u2
       } else {
         url = u1.toString();
       }
