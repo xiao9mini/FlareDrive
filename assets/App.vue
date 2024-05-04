@@ -55,7 +55,7 @@
         >
           <div class="file-icon">
             <img
-              src="/assets/folder_icon.png"
+              src="/assets/folder_back_icon.png"
               width="36"
               height="36"
               alt="Folder"
@@ -76,7 +76,7 @@
         >
           <div class="file-icon">
             <img
-              src="/assets/folder_back_icon.png"
+              src="/assets/folder_icon.png"
               width="36"
               height="36"
               alt="Folder"
