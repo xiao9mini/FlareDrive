@@ -229,7 +229,9 @@ export default {
 
   methods: {
     copyLink(link) {
-      const url = context.env["PUBURL"] + "/" + window.location.origin.split("/raw/")[1]
+      const u1 = new URL(link, window.location.origin);
+      const u2 = url.toString().split("/raw/")[1]
+      const url = "https://s3.1314234.xyz/" + u2
       navigator.clipboard.writeText(url);
     },
 
