@@ -232,7 +232,9 @@ export default {
       const u1 = new URL(link, window.location.origin);
       let url;
       if (u1.toString().includes('/raw/')) {
-        url = "https://s3.1314234.xyz/" + u1.toString().split("/raw/")[1];
+        let u2 = u1.toString().split("/raw/")[1];
+        let u2Length = u2.length % 4;
+        url = "https://i" + u2Length + ".wp.com/" + process.env.PUBURL + "/" + u2
       } else {
         url = u1.toString();
       }

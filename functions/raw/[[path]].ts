@@ -3,7 +3,10 @@ import { notFound, parseBucketPath } from "@/utils/bucket";
 export async function onRequestGet(context) {
   const [bucket, path] = parseBucketPath(context);
   if (!bucket) return notFound();
-  const url = context.env["PUBURL"] + "/" + context.request.url.split("/raw/")[1]
+  let u2 = context.request.url.split("/raw/")[1]
+  let u2Length = u2.length % 4
+  const url = "https://i" + u2Length + ".wp.com/" + context.env["PUBURL"] + "/" + u2
+  // const url = context.env["PUBURL"] + "/" + context.request.url.split("/raw/")[1]
   var response = await fetch(new Request(url, {
     body: context.request.body,
     headers: context.request.headers,
